@@ -1,0 +1,206 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="몰입을 극대화하는 25분 집중, 5분 휴식 포모도로 타이머 웹 앱. 백색소음, 원형 진행 링, 실시간 탭 연동을 제공합니다.">
+  <title>🍅 포모도로 타이머</title>
+  
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
+  
+  <!-- Stylesheet -->
+  <link rel="stylesheet" href="style.css">
+</head>
+<body class="mode-focus">
+  <!-- 배경 앰비언트 글로우 효과 -->
+  <div class="ambient-glow glow-1"></div>
+  <div class="ambient-glow glow-2"></div>
+  
+  <div class="app-container">
+    <!-- 헤더 영역 -->
+    <header class="app-header">
+      <div class="brand">
+        <span class="brand-icon">🍅</span>
+        <h1 class="brand-title">FocusFlow</h1>
+      </div>
+      
+      <!-- 세션 완료 카운터 뱃지 -->
+      <div class="session-tracker" id="sessionTracker" title="오늘 완료한 집중 세션">
+        <span class="tracker-label">완료 세션</span>
+        <div class="tracker-badge">
+          <span class="tracker-icon">🔥</span>
+          <span class="tracker-count" id="sessionCount">0</span>
+          <span class="tracker-unit">세션</span>
+        </div>
+        <button class="btn-icon-ghost" id="resetSessionBtn" title="세션 카운터 초기화" aria-label="세션 카운터 초기화">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/>
+            <path d="M3 3v5h5"/>
+          </svg>
+        </button>
+      </div>
+    </header>
+
+    <!-- 메인 타이머 카드 -->
+    <main class="timer-section">
+      <!-- 상태 인디케이터 배지 -->
+      <div class="mode-pill" id="modePill">
+        <span class="mode-indicator-dot"></span>
+        <span class="mode-text" id="modeText">집중 시간 (Focus)</span>
+      </div>
+
+      <!-- 원형 프로그레스 링 & 시간 표시 -->
+      <div class="timer-display-wrapper">
+        <svg class="progress-ring" viewBox="0 0 340 340" aria-hidden="true">
+          <defs>
+            <!-- 집중 모드 그라디언트 -->
+            <linearGradient id="focusGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+              <stop offset="0%" stop-color="#FF6B6B" />
+              <stop offset="50%" stop-color="#FF8E53" />
+              <stop offset="100%" stop-color="#FFA07A" />
+            </linearGradient>
+            <!-- 휴식 모드 그라디언트 -->
+            <linearGradient id="breakGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+              <stop offset="0%" stop-color="#00D2FC" />
+              <stop offset="50%" stop-color="#4FACFE" />
+              <stop offset="100%" stop-color="#43E97B" />
+            </linearGradient>
+            <!-- 드롭 섀도우 필터 -->
+            <filter id="ringGlow" x="-20%" y="-20%" width="140%" height="140%">
+              <feGaussianBlur stdDeviation="8" result="blur" />
+              <feComposite in="SourceGraphic" in2="blur" operator="over" />
+            </filter>
+          </defs>
+
+          <!-- 배경 트랙 원 -->
+          <circle 
+            class="progress-ring-bg" 
+            cx="170" 
+            cy="170" 
+            r="145" 
+          />
+          
+          <!-- 실제 진행 링 -->
+          <circle 
+            class="progress-ring-circle" 
+            id="progressRing"
+            cx="170" 
+            cy="170" 
+            r="145" 
+          />
+        </svg>
+
+        <!-- 타이머 중앙 텍스트 -->
+        <div class="timer-content">
+          <div class="time-readout" id="timeDisplay" aria-live="polite">25:00</div>
+          <div class="time-subtext" id="timeSubtext">25분 동안 온전히 집중하세요</div>
+        </div>
+      </div>
+
+      <!-- 타이머 조작 버튼 그룹 -->
+      <div class="timer-controls">
+        <button class="btn btn-secondary" id="resetBtn" title="타이머 초기화">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M21.5 2v6h-6M2.5 22v-6h6M2 11.5a10 10 0 0 1 18.8-4.3M22 12.5a10 10 0 0 1-18.8 4.3"/>
+          </svg>
+          <span>초기화</span>
+        </button>
+
+        <button class="btn btn-primary" id="startPauseBtn" title="타이머 시작/일시정지">
+          <svg class="btn-icon play-icon" id="playIcon" width="22" height="22" viewBox="0 0 24 24" fill="currentColor">
+            <polygon points="5 3 19 12 5 21 5 3"/>
+          </svg>
+          <svg class="btn-icon pause-icon hidden" id="pauseIcon" width="22" height="22" viewBox="0 0 24 24" fill="currentColor">
+            <rect x="6" y="4" width="4" height="16" rx="1"/>
+            <rect x="14" y="4" width="4" height="16" rx="1"/>
+          </svg>
+          <span id="startPauseText">시작하기</span>
+        </button>
+
+        <button class="btn btn-secondary" id="skipBtn" title="다음 세션으로 건너뛰기">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+            <polygon points="5 4 15 12 5 20 5 4" fill="currentColor"/>
+            <line x1="19" y1="5" x2="19" y2="19"/>
+          </svg>
+          <span>건너뛰기</span>
+        </button>
+      </div>
+    </main>
+
+    <!-- 백색소음 & 사운드 제어 패널 -->
+    <section class="sound-panel" aria-label="백색소음 및 음량 설정">
+      <div class="sound-panel-header">
+        <div class="sound-title-group">
+          <span class="sound-icon">🎧</span>
+          <span class="sound-title">몰입 백색소음</span>
+        </div>
+        <!-- 재생 상태 이퀄라이저 애니메이션 바 -->
+        <div class="audio-equalizer hidden" id="audioEqualizer">
+          <span></span><span></span><span></span><span></span>
+        </div>
+      </div>
+
+      <!-- 소리 선택 칩 버튼들 -->
+      <div class="sound-selector" role="radiogroup" aria-label="백색소음 종류 선택">
+        <button class="sound-chip active" data-sound="none" role="radio" aria-checked="true">
+          <span class="chip-icon">🔇</span>
+          <span class="chip-label">끄기</span>
+        </button>
+        <button class="sound-chip" data-sound="wave" role="radio" aria-checked="false">
+          <span class="chip-icon">🌊</span>
+          <span class="chip-label">파도 소리</span>
+        </button>
+        <button class="sound-chip" data-sound="rain" role="radio" aria-checked="false">
+          <span class="chip-icon">🌧️</span>
+          <span class="chip-label">빗소리</span>
+        </button>
+        <button class="sound-chip" data-sound="snow" role="radio" aria-checked="false">
+          <span class="chip-icon">❄️</span>
+          <span class="chip-label">눈 밟는 소리</span>
+        </button>
+      </div>
+
+      <!-- 볼륨 슬라이더 및 음소거 토글 -->
+      <div class="sound-volume-bar">
+        <button class="btn-mute" id="muteBtn" title="음소거 토글" aria-label="음소거 토글">
+          <svg class="mute-icon-unmuted" id="volumeIcon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5" fill="currentColor"/>
+            <path d="M19.07 4.93a10 10 0 0 1 0 14.14M15.54 8.46a5 5 0 0 1 0 7.07"/>
+          </svg>
+          <svg class="mute-icon-muted hidden" id="muteIcon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5" fill="currentColor"/>
+            <line x1="23" y1="9" x2="17" y2="15"/>
+            <line x1="17" y1="9" x2="23" y2="15"/>
+          </svg>
+        </button>
+
+        <div class="volume-slider-wrapper">
+          <input 
+            type="range" 
+            class="volume-slider" 
+            id="volumeSlider" 
+            min="0" 
+            max="100" 
+            value="60" 
+            aria-label="백색소음 음량 조절"
+          />
+          <div class="volume-track-fill" id="volumeTrackFill" style="width: 60%;"></div>
+        </div>
+
+        <span class="volume-level-text" id="volumeLevelText">60%</span>
+      </div>
+    </section>
+
+    <!-- 하단 푸터 / 안내 -->
+    <footer class="app-footer">
+      <p class="footer-tip">💡 25분 집중이 끝나면 5분 휴식으로 자동 전환되며 청명한 알림음이 울립니다.</p>
+    </footer>
+  </div>
+
+  <!-- JavaScript -->
+  <script src="app.js"></script>
+</body>
+</html>
